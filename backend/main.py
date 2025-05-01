@@ -1,46 +1,44 @@
-from http import HTTPStatus
-
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 from sql_conncetion import get_sql_connection
-from task_dao import get_task_subtask_data, get_all_task_subtask_data
-from subtask_dao import get_subtask_date, create_subtasks
-from list_dao import get_all_todo_list_data
+from task_dao import get_task_subtask_data, get_all_task_subtask_data, Task, create_tasks, get_task_data
+from subtask_dao import create_subtasks, delete_subtask, Subtask
+
 
 app = FastAPI()
 connection = get_sql_connection()
 
 
-class SubtaskCreate(BaseModel):
-    task_id : int
-    title: str
-    is_completed: Optional[bool] = None
-
-class SubtaskUpdate(BaseModel):
-    title: Optional[str] = None
-    is_completed: Optional[bool] = None
 
 @app.get("/HelloWorld")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello World"}
 
 
-
-@app.get("list/get")
-def get_all_lists_data():
-    pass
-
-@app.get("/task/{task_id}/subtasks/get")
-def get_subtask_data_by_task_id(task_id : int):
-    data = get_task_subtask_data(connection, task_id)
+@app.get("/task/{task_id}/get")
+def get_all_task_data(task_id : int):
     response = []
-    for (subtask_title, subtask_status ) in data:
+    task_data = get_task_data(connection , task_id)
+    subtask_data = get_task_subtask_data(connection, task_id)
+    for (task_title, task_is_completed, task_priority) in task_data:
+        response.append({
+            "Task title" : task_title,
+            "Task status" : "Done" if task_is_completed else "Todo",
+            "Task priority" : task_priority
+        })
+    for (subtask_title, subtask_status) in subtask_data:
         response.append({
             'title': subtask_title,
-            'status' : "Done" if subtask_status else "Todo"
+            'status': "Done" if subtask_status else "Todo"
         })
     return response
+
+
+@app.post("/task/create")
+def create_task(task : Task):
+    create_tasks(connection , task)
+    return {"Task created successfully"}
 
 @app.get("/task/all_data")
 def get_all_tasks():
@@ -54,17 +52,17 @@ def get_all_tasks():
         if "title" not in task_entry:
             task_entry["title"] = task_title
         # Append the current detail
-        task_entry["Subtasks"].append({
-            "title": subtask_title,
-            "status": "Completed" if subtask_status else "Todo"
-        })
+        if subtask_title:
+            task_entry["Subtasks"].append({
+                "title": subtask_title,
+                "status": "Completed" if subtask_status else "Todo"
+            })
     return response
 
-@app.get("/subtask/{subtask_id}/get")
-def get_subtask_data_by_subtask_id(subtask_id: int):
-    data = get_subtask_date(connection, subtask_id)
-    if len(data) == 0:
-        return {"Sorry subtask not found"}
+
+@app.get("/task/{task_id}/subtasks/get")
+def get_all_subtasks_by_task_id(task_id : int):
+    data = get_task_subtask_data(connection, task_id)
     response = []
     for (subtask_title, subtask_status) in data:
         response.append({
@@ -73,19 +71,23 @@ def get_subtask_data_by_subtask_id(subtask_id: int):
         })
     return response
 
-@app.post("/task/{task_id}/subtask/create")
-def create_subtask(subtasks_data: List[SubtaskCreate]):
+
+@app.post("/subtask/create")
+def create_subtask(subtasks_data: List[Subtask]):
     data = []
     for subtask in subtasks_data:
         data.append([subtask.task_id , subtask.title])
-    print(data)
-
     create_subtasks(connection , data)
-
     return {"Subtasks created successfully"}
 
-@app.post("/subtask/{subtask_id}/edit")
-def edit_subtask(subtask_id : int , subtask_data: SubtaskUpdate):
-    pass
+# @app.post("/subtask/{subtask_id}/edit")
+# def edit_subtask(subtask_id : int , subtask_data):
+#     pass
+
+@app.post("/subtask/{subtask_id}/delete")
+def remove_subtask(subtask_id : int):
+    delete_subtask(connection , subtask_id)
+    return {f"Subtask {subtask_id} was removed successfully"}
+
 
 

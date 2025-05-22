@@ -6,7 +6,7 @@ class Subtask(BaseModel):
     is_completed: bool = None
 
 
-def get_subtask_date(connection, subtask_id):
+def get_subtask_data(connection, subtask_id):
     cursor = connection.cursor()
     query = ("SELECT title, is_completed "
     "FROM todo_list.subtask "

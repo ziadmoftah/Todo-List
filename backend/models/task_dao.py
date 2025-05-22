@@ -52,5 +52,5 @@ def get_task_data(connection, task_id : int):
     cursor.execute(query)
     task_data = []
     for ( task_title, task_is_completed, task_priority) in cursor:
-        task_data.append({task_title, task_is_completed, task_priority})
+        task_data.append([task_title, task_is_completed, task_priority])
     return task_data

@@ -1,12 +1,4 @@
-from pydantic import BaseModel
 
-
-
-class Task(BaseModel):
-    title: str
-    is_completed: bool = None
-    priority_id: int
-    list_id: int
 
 def get_task_subtask_data(connection, task_id):
     cursor = connection.cursor()
@@ -34,7 +26,7 @@ def get_all_task_subtask_data(connection):
         data.append( [task_id, task_title, subtask_title,is_completed ] )
     return data
 
-def create_tasks(connection , task_data: Task):
+def create_tasks(connection , task_data):
     cursor = connection.cursor()
     query = ("INSERT INTO `todo_list`.`todo_list_task` (`title`, `id_priority`, `id_list`) "
              "VALUES (%s, %s, %s)")

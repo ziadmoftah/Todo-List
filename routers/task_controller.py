@@ -1,5 +1,8 @@
 from sql_conncetion import get_sql_connection
-from models.task_dao import get_task_subtask_data, get_all_task_subtask_data, Task, create_tasks, get_task_data
+from models.task_dao import get_task_subtask_data, get_all_task_subtask_data, create_tasks, get_task_data
+
+from schemas.subtask_schema import SubtaskGet
+from schemas.task_schema import TaskCreate, TaskGet
 from fastapi import FastAPI, APIRouter
 from typing import List
 
@@ -9,40 +12,35 @@ connection = get_sql_connection()
 
 router = APIRouter(
     tags=["Tasks"], # Group these endpoints in Swagger UI
-    responses={404: {"description": "Not found"}},
+    prefix="/task"
 )
 
 
-@router.get("/task/{task_id}/get")
+@router.get("/{task_id}/get" , response_model=TaskGet)
 def get_single_task_data(task_id : int):
-    response = {
-        "Task title": "",
-        "Task status": "",
-        "Task priority": "",
-        "Subtasks": []
-    }
+    response = TaskGet(title="", is_completed=False, priority="", subtasks=[])
     task_data = get_task_data(connection , task_id)
-    subtask_data = get_task_subtask_data(connection, task_id)
-    #print(task_data)
     for (task_title, task_is_completed, task_priority) in task_data:
-        response["Task title"] = task_title
-        response["Task status"] = "Done" if task_is_completed else "Todo"
-        response["Task priority"] = task_priority
+        response.title = task_title
+        response.is_completed = task_is_completed
+        response.priority = task_priority
+
+    subtask_data = get_task_subtask_data(connection, task_id)
     for (subtask_title, subtask_status) in subtask_data:
-        response["Subtasks"].append({
-            'title': subtask_title,
-            'status': "Done" if subtask_status else "Todo"
-        })
+        response.subtasks.append(SubtaskGet(
+            title=subtask_title,
+            is_completed=subtask_status
+        ))
     return response
 
 
 
-@router.post("/task/create")
-def create_task(task : Task):
+@router.post("/create")
+def create_task(task : TaskCreate):
     create_tasks(connection , task)
     return {"Task created successfully"}
 
-@router.get("/task/all_data")
+@router.get("/all_data")
 def get_all_tasks_data():
     data = get_all_task_subtask_data(connection)
     response = {}

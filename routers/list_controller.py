@@ -12,9 +12,7 @@ router = APIRouter(
 
 @router.get("/{list_id}/get" , response_model=ListGet)
 def get_single_list_data(list_id : int):
-    return "HEllO"
     data = get_all_todo_list_data(connection , list_id)
     response = ListGet(title="", priority="" , tasks=[])
     for (list_title, list_priority, task_title, task_priority, task_is_completed, subtask_title, subtask_is_completed) in data:
         pass
-    return ListGet()

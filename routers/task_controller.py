@@ -12,7 +12,7 @@ connection = get_sql_connection()
 
 router = APIRouter(
     tags=["Tasks"], # Group these endpoints in Swagger UI
-    prefix="/task"
+    prefix="/tasks"
 )
 
 

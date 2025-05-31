@@ -6,3 +6,7 @@ class ListGet(BaseModel):
     title: str
     priority: str
     tasks: list[TaskGet]
+
+class ListCreate(BaseModel):
+    title: str
+    priority: int

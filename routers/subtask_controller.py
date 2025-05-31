@@ -8,7 +8,7 @@ connection = get_sql_connection()
 
 router = APIRouter(
     tags=["Subtasks"], # Group these endpoints in Swagger UI
-    prefix="/subtask"
+    prefix="/subtasks"
 )
 
 @router.get("/{subtask_id}/get", response_model=SubtaskGet)

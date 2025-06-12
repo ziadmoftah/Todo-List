@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from todos.subtasks.models import NewSubtaskGet
 
-
 class NewTaskCreate(BaseModel):
     title: str
     is_completed: bool = False
@@ -17,6 +16,6 @@ class NewTaskGet(BaseModel):
 class NewSubtaskEdit(BaseModel):
     title: str = None
     is_completed: bool = None
-    priority: str = None
+    id_priority: int = None
 
 

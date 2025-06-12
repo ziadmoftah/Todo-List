@@ -1,9 +1,9 @@
 from pydantic import BaseModel
+
 class NewSubtaskCreate(BaseModel):
     title: str
     is_completed: bool = False
     id_task: int
-
 
 class NewSubtaskGet(BaseModel):
     title: str

@@ -26,8 +26,8 @@ def create_subtasks(db: Session, subtasks: List[NewSubtaskCreate]):
     return "Subtasks created successfully"
 
 def edit_subtask(db: Session, subtask_id: int , subtask: NewSubtaskEdit) -> NewSubtaskGet:
-    if subtask.title is None and subtask.is_completed is None:
-        raise HTTPException(HTTP_400_BAD_REQUEST, "No subtask data was passed to be edited")
+    if not subtask.model_fields_set:
+        raise HTTPException(HTTP_400_BAD_REQUEST, "Subtask Edit Request body was empty")
     db_subtask = db.query(Subtask).filter(Subtask.id_subtask == subtask_id).first()
     if db_subtask is None:
         raise HTTPException(HTTP_404_NOT_FOUND, "Subtask is not found")
@@ -42,6 +42,11 @@ def edit_subtask(db: Session, subtask_id: int , subtask: NewSubtaskEdit) -> NewS
 def delete_subtask(db : Session , subtask_id: int):
     db_subtask = db.query(Subtask).filter(Subtask.id_subtask == subtask_id).first()
     if db_subtask is None:
-        raise HTTPException(HTTP_404_NOT_FOUND, "Subtask is not found")
+        raise HTTPException(HTTP_404_NOT_FOUND, "No subtask found by given subtask_id")
     db.delete(db_subtask)
     db.commit()
+
+def delete_subtasks_by_task_id(db: Session, task_id: int):
+    db.query(Subtask).filter(Subtask.id_task == task_id).delete()
+    db.commit()
+    return

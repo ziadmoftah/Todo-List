@@ -9,7 +9,6 @@ from todos.subtasks import services as subtask_services
 from todos.subtasks.models import NewSubtaskGet
 from todos.tasks.models import NewTaskCreate, NewTaskGet, NewSubtaskEdit
 
-
 def get_task_by_task_id(db : Session, task_id : int) -> NewTaskGet:
     db_task = db.query(
         Task.title.label('task_title'),
@@ -57,3 +56,29 @@ def get_tasks_by_list_id(db: Session, list_id : int) -> List[NewTaskGet]:
             )
         tasks[task_title].subtasks.append(NewSubtaskGet(title=subtask_title,is_completed=subtask_is_completed))
     return list(tasks.values())
+
+def edit_task(db: Session , task_id: int, task: NewSubtaskEdit) -> NewTaskGet:
+    if not task.model_fields_set :
+        raise HTTPException(HTTP_400_BAD_REQUEST, "Task Edit Request body was empty")
+    db_task = db.query(Task).filter(Task.id_task == task_id).first()
+    if db_task is None:
+        raise HTTPException(HTTP_404_NOT_FOUND, "Task is not found")
+    if task.title is not None:
+        db_task.title = task.title
+    if task.is_completed is not None:
+        db_task.is_completed = task.is_completed
+    if task.id_priority is not None:
+        db_task.id_priority = task.id_priority
+    db.commit()
+    db.refresh(db_task)
+    return NewTaskGet(title=db_task.title,
+                      is_completed=db_task.is_completed,
+                      priority=(db.query(Priority.title).filter(Priority.id_priority == db_task.id_priority).first()).title,
+                      subtasks= subtask_services.get_subtasks_by_task_id(db, task_id))
+
+def delete_task(db: Session, task_id: int):
+    deleted_tasks_count = db.query(Task).filter(Task.id_task == task_id).delete()
+    if deleted_tasks_count == 0:
+        raise HTTPException(HTTP_400_BAD_REQUEST, "No task found for given task_id")
+    subtask_services.delete_subtasks_by_task_id(db , task_id)
+    db.commit()

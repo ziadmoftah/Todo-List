@@ -1,17 +1,17 @@
 from typing import List
 from pydantic import BaseModel
-from todos.tasks.models import NewTaskGet
+from todos.tasks.models import TaskGet
 
 
-class NewListCreate(BaseModel):
+class ListCreate(BaseModel):
     title: str
     id_priority: int
 
-class NewListGet(BaseModel):
+class ListGet(BaseModel):
     title: str
     priority: str
-    tasks: List[NewTaskGet]
+    tasks: List[TaskGet]
 
-class NewListEdit(BaseModel):
+class ListEdit(BaseModel):
     title: str = None
     id_priority: int = None

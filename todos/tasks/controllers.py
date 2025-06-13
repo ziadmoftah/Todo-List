@@ -2,28 +2,30 @@ from typing import List
 from fastapi import  APIRouter
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from database.core import DbSession
+from todos.subtasks.models import SubtaskGet
 from todos.tasks import services
-from todos.tasks.models import NewTaskGet, NewTaskCreate, NewSubtaskEdit
+from todos.subtasks import services as subtask_services
+from todos.tasks.models import TaskGet, TaskCreate, TaskEdit
 
 router = APIRouter(
-    tags=["NewTasks"], # Group these endpoints in Swagger UI
-    prefix="/NewTasks"
+    tags=["Tasks"], # Group these endpoints in Swagger UI
+    prefix="/tasks"
 )
 
-@router.get("/{task_id}/get" , status_code=HTTP_200_OK, response_model=NewTaskGet)
-def getNewTaskData(db : DbSession,task_id : int):
+@router.get("/{task_id}/get" , status_code=HTTP_200_OK, response_model=TaskGet)
+def get_task_data(db : DbSession,task_id : int):
     return services.get_task_by_task_id(db , task_id)
 
-@router.post("/create", status_code=HTTP_201_CREATED, response_model=NewTaskCreate)
-def create_task(db: DbSession, task : NewTaskCreate):
+@router.get("/{task_id}/subtasks" , status_code=HTTP_200_OK, response_model=List[SubtaskGet])
+def get_subtasks_by_task_id(db : DbSession, task_id : int):
+    return subtask_services.get_subtasks_by_task_id(db , task_id)
+
+@router.post("/create", status_code=HTTP_201_CREATED, response_model=TaskCreate)
+def create_task(db: DbSession, task : TaskCreate):
     return services.create_task(db , task)
 
-@router.get("/{list_id}/tasks", status_code=HTTP_200_OK , response_model=List[NewTaskGet])
-def get_tasks_by_list_id(db: DbSession, list_id : int):
-    return services.get_tasks_by_list_id(db, list_id)
-
-@router.post("/{task_id}/edit", status_code= HTTP_200_OK , response_model=NewTaskGet)
-def edit_task(db: DbSession , task_id: int, task: NewSubtaskEdit):
+@router.post("/{task_id}/edit", status_code= HTTP_200_OK , response_model=TaskGet)
+def edit_task(db: DbSession , task_id: int, task: TaskEdit):
     return services.edit_task(db, task_id, task)
 
 @router.post("/{task_id}/delete", status_code= HTTP_204_NO_CONTENT)

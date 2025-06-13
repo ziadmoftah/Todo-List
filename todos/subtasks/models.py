@@ -1,14 +1,14 @@
 from pydantic import BaseModel
 
-class NewSubtaskCreate(BaseModel):
+class SubtaskCreate(BaseModel):
     title: str
     is_completed: bool = False
     id_task: int
 
-class NewSubtaskGet(BaseModel):
+class SubtaskGet(BaseModel):
     title: str
     is_completed: bool = False
 
-class NewSubtaskEdit(BaseModel):
+class SubtaskEdit(BaseModel):
     title: str = None
     is_completed: bool = None

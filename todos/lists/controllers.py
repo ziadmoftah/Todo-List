@@ -1,20 +1,22 @@
-from typing import List
+from typing import List, Annotated
 from fastapi import APIRouter
+from fastapi.params import Depends
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_204_NO_CONTENT
 from database.core import DbSession
 from todos.lists.models import ListGet, ListCreate, ListEdit
 from todos.lists import services
 from todos.tasks import services as task_services
 from todos.tasks.models import TaskGet
+from utils.pagination import Pagination,pagination_param
 
 router = APIRouter(
     tags=["Lists"], # Group these endpoints in Swagger UI
     prefix="/lists"
 )
 
-@router.post("/get" , status_code=HTTP_200_OK , response_model= List[ListGet])
-def get_all_lists_data(db: DbSession):
-    return services.get_all_lists_data(db)
+@router.post("/get" , status_code=HTTP_200_OK, response_model=List[ListGet])
+def get_all_lists_data(db: DbSession, pagination: Annotated[Pagination, Depends(pagination_param)]):
+    return services.get_all_lists_data(db, pagination)
 
 @router.get("/{list_id}/get", status_code=HTTP_200_OK , response_model=ListGet)
 def get_list_data(db : DbSession, list_id: int):

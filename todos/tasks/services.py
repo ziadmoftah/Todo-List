@@ -8,8 +8,10 @@ from entities.priority import Priority
 from todos.subtasks import services as subtask_services
 from todos.subtasks.models import SubtaskGet
 from todos.tasks.models import TaskCreate, TaskGet, TaskEdit
+from utils.pagination import Pagination
 
-def get_task_by_task_id(db : Session, task_id : int) -> TaskGet:
+
+def get_task_by_task_id(db : Session, task_id : int, pagination: Pagination) :
     db_task = db.query(
         Task.title.label('task_title'),
         Task.is_completed,
@@ -21,7 +23,7 @@ def get_task_by_task_id(db : Session, task_id : int) -> TaskGet:
     ).first()
     if db_task is None:
         raise HTTPException(HTTP_404_NOT_FOUND, "Task is not found")
-    db_subtask = subtask_services.get_subtasks_by_task_id(db , task_id)
+    db_subtask = subtask_services.get_subtasks_by_task_id(db , task_id , pagination)
     return TaskGet(subtasks=db_subtask, title=db_task.task_title, priority=db_task.priority_title, is_completed=db_task.is_completed)
 
 def create_task(db: Session , task: TaskCreate) -> TaskCreate:

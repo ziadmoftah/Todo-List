@@ -1,11 +1,13 @@
-from typing import List
+from typing import List, Annotated
 from fastapi import  APIRouter
+from fastapi.params import Depends
 from starlette.status import HTTP_200_OK, HTTP_201_CREATED, HTTP_204_NO_CONTENT
 from database.core import DbSession
 from todos.subtasks.models import SubtaskGet
 from todos.tasks import services
 from todos.subtasks import services as subtask_services
 from todos.tasks.models import TaskGet, TaskCreate, TaskEdit
+from utils.pagination import Pagination, pagination_param
 
 router = APIRouter(
     tags=["Tasks"], # Group these endpoints in Swagger UI
@@ -13,12 +15,12 @@ router = APIRouter(
 )
 
 @router.get("/{task_id}/get" , status_code=HTTP_200_OK, response_model=TaskGet)
-def get_task_data(db : DbSession,task_id : int):
-    return services.get_task_by_task_id(db , task_id)
+def get_task_data(db : DbSession,task_id : int, pagination: Annotated[Pagination, Depends(pagination_param)]):
+    return services.get_task_by_task_id(db , task_id, pagination)
 
 @router.get("/{task_id}/subtasks" , status_code=HTTP_200_OK, response_model=List[SubtaskGet])
-def get_subtasks_by_task_id(db : DbSession, task_id : int):
-    return subtask_services.get_subtasks_by_task_id(db , task_id)
+def get_subtasks_by_task_id(db : DbSession, task_id : int , pagination: Annotated[Pagination, Depends(pagination_param)]):
+    return subtask_services.get_subtasks_by_task_id(db , task_id , pagination)
 
 @router.post("/create", status_code=HTTP_201_CREATED, response_model=TaskCreate)
 def create_task(db: DbSession, task : TaskCreate):

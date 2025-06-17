@@ -1,12 +1,15 @@
-from typing import List
+from math import ceil
+from typing import List, Annotated
 
 from fastapi import HTTPException
+from fastapi.params import Depends
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from entities.priority import Priority
 from entities.list import List as Todo_List
 from todos.lists.models import ListGet, ListCreate, ListEdit
 from todos.tasks import services as task_services
+from utils.pagination import Pagination, pagination_param
 
 
 def get_list_data(db: Session, list_id: int) -> ListGet:
@@ -38,8 +41,10 @@ def edit_list(db: Session, list_id: int, list: ListEdit) -> ListCreate:
     db.refresh(db_list)
     return ListCreate(title=db_list.title , id_priority=db_list.id_priority)
 
-def get_all_lists_data(db :Session) -> List[ListGet]:
+def get_all_lists_data(db :Session, pagination: Pagination) -> List[ListGet]:
     db_lists = (db.query(Todo_List.title , Priority.title)
                 .join(Priority , Todo_List.id_priority == Priority.id_priority)
+                .offset((pagination.page - 1) * pagination.page_size)
+                .limit(pagination.page_size)
                 .all())
     return [ListGet(title=todo_list[0], priority=todo_list[1]) for todo_list in db_lists]

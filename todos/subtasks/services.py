@@ -1,9 +1,11 @@
+from math import ceil
 from typing import List
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
 from entities.subtask import Subtask
 from todos.subtasks.models import SubtaskGet, SubtaskCreate, SubtaskEdit
+from utils.pagination import Pagination
 
 
 def get_subtask_by_subtask_id(db : Session, subtask_id : int) -> SubtaskGet:
@@ -12,8 +14,12 @@ def get_subtask_by_subtask_id(db : Session, subtask_id : int) -> SubtaskGet:
         raise HTTPException(HTTP_404_NOT_FOUND, "Subtask is not found")
     return db_subtask
 
-def get_subtasks_by_task_id(db : Session, task_id : int) -> List[SubtaskGet]:
-    db_subtasks = db.query(Subtask).filter(Subtask.id_task == task_id).all()
+def get_subtasks_by_task_id(db : Session, task_id : int, pagination : Pagination) -> List[SubtaskGet]:
+    db_subtasks = (db.query(Subtask)
+                   .filter(Subtask.id_task == task_id)
+                   .offset((pagination.page - 1) * pagination.page_size)
+                   .limit(pagination.page_size)
+                   .all())
     return [SubtaskGet(title=subtask.title , is_completed=subtask.is_completed) for subtask in db_subtasks]
 
 def create_subtasks(db: Session, subtasks: List[SubtaskCreate]):

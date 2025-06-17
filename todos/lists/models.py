@@ -10,8 +10,8 @@ class ListCreate(BaseModel):
 class ListGet(BaseModel):
     title: str
     priority: str
-    tasks: List[TaskGet]
+    tasks: List[TaskGet] | None = None
 
 class ListEdit(BaseModel):
-    title: str = None
-    id_priority: int = None
+    title: str | None = None
+    id_priority: int | None = None

@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
@@ -35,3 +37,9 @@ def edit_list(db: Session, list_id: int, list: ListEdit) -> ListCreate:
     db.commit()
     db.refresh(db_list)
     return ListCreate(title=db_list.title , id_priority=db_list.id_priority)
+
+def get_all_lists_data(db :Session) -> List[ListGet]:
+    db_lists = (db.query(Todo_List.title , Priority.title)
+                .join(Priority , Todo_List.id_priority == Priority.id_priority)
+                .all())
+    return [ListGet(title=todo_list[0], priority=todo_list[1]) for todo_list in db_lists]

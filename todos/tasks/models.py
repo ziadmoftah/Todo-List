@@ -14,8 +14,8 @@ class TaskGet(BaseModel):
     subtasks: list[SubtaskGet]
 
 class TaskEdit(BaseModel):
-    title: str = None
-    is_completed: bool = None
-    id_priority: int = None
+    title: str | None = None
+    is_completed: bool | None = None
+    id_priority: int | None = None
 
 

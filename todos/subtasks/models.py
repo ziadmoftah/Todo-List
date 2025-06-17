@@ -10,5 +10,5 @@ class SubtaskGet(BaseModel):
     is_completed: bool = False
 
 class SubtaskEdit(BaseModel):
-    title: str = None
-    is_completed: bool = None
+    title: str | None = None
+    is_completed: bool | None = None

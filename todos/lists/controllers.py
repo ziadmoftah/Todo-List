@@ -12,6 +12,10 @@ router = APIRouter(
     prefix="/lists"
 )
 
+@router.post("/get" , status_code=HTTP_200_OK , response_model= List[ListGet])
+def get_all_lists_data(db: DbSession):
+    return services.get_all_lists_data(db)
+
 @router.get("/{list_id}/get", status_code=HTTP_200_OK , response_model=ListGet)
 def get_list_data(db : DbSession, list_id: int):
     return services.get_list_data(db , list_id)

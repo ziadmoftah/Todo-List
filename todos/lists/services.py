@@ -2,7 +2,9 @@ from typing import List
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from starlette.status import HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_401_UNAUTHORIZED
+
+from auth.services import CurrentUser
 from entities.priority import Priority
 from entities.list import List as Todo_List
 from todos.lists.models import ListGet, ListCreate, ListEdit
@@ -38,7 +40,9 @@ def edit_list(db: Session, list_id: int, list: ListEdit) -> ListCreate:
     db.refresh(db_list)
     return ListCreate(title=db_list.title , id_priority=db_list.id_priority)
 
-def get_all_lists_data(db :Session) -> List[ListGet]:
+def get_all_lists_data(db :Session, user: CurrentUser) -> List[ListGet]:
+    if not user:
+        raise HTTPException(status_code=HTTP_401_UNAUTHORIZED, detail="Unauthorized User")
     db_lists = (db.query(Todo_List.title , Priority.title)
                 .join(Priority , Todo_List.id_priority == Priority.id_priority)
                 .all())

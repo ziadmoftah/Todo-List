@@ -1,6 +1,8 @@
 from typing import List
 from fastapi import APIRouter
 from starlette.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_204_NO_CONTENT
+
+from auth.services import CurrentUser
 from database.core import DbSession
 from todos.lists.models import ListGet, ListCreate, ListEdit
 from todos.lists import services
@@ -13,8 +15,8 @@ router = APIRouter(
 )
 
 @router.post("/get" , status_code=HTTP_200_OK , response_model= List[ListGet])
-def get_all_lists_data(db: DbSession):
-    return services.get_all_lists_data(db)
+def get_all_lists_data(db: DbSession, user: CurrentUser):
+    return services.get_all_lists_data(db, user)
 
 @router.get("/{list_id}/get", status_code=HTTP_200_OK , response_model=ListGet)
 def get_list_data(db : DbSession, list_id: int):
